@@ -4,7 +4,7 @@
 
 Currently, it supports tracking aircraft via **ADS-B** (1090 MHz) and vessels via **AIS** (161.975 MHz).
 
-## ✨ Features
+##  Features
 
 - **Native C++ DSP Engine**:
   - Direct USB interfacing with RTL-SDR devices via `librtlsdr`.
@@ -27,7 +27,7 @@ Currently, it supports tracking aircraft via **ADS-B** (1090 MHz) and vessels vi
   - Live statistics, altitude histograms, and signal quality metrics.
   - Military-grade UI with advanced color-coding (e.g., emergencies flashing red, military units in green).
 
-## 🏗 Architecture
+##  Architecture
 
 The system consists of three main decoupled layers communicating asynchronously:
 
@@ -41,7 +41,7 @@ The system consists of three main decoupled layers communicating asynchronously:
    - **File:** `dashboard/frontend/`
    - A highly responsive browser-based UI that renders the live data stream onto an interactive map with accompanying telemetry tables.
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Windows OS (C++ engine utilizes Win32 APIs).
@@ -76,7 +76,4 @@ Open `http://localhost:5173` in your browser.
 2. Select **Source:** Local USB (RTL-SDR).
 3. Select **Mode:** ADS-B.
 4. Click **START**.
-5. Watch the dashboard populate as aircraft signals are captured and decoded in real-time!
-
-## 📜 License
-This project is for educational and research purposes.
+5. Watch the dashboard populate as aircraft signals are captured and decoded in real-time
