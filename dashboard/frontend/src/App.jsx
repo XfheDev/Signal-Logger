@@ -12,6 +12,31 @@ import './index.css';
 // ═══════════════════════════════════════════════════════════════
 const RECEIVER_DEFAULT = { lat: 41.015137, lon: 28.979530 };
 const SIGNAL_TIMEOUT   = 90; // seconds — must match backend
+const IS_DEMO_MODE     = new URLSearchParams(window.location.search).has('demo');
+
+// ── DEMO SIMULATOR ───────────────────────────────────────────
+const DEMO_FLIGHTS = [
+  { icao: "4BAA51", callsign: "THY24J", lat: 41.2, lon: 28.5, speed: 450, heading: 120, altitude: 32000, protocol: "ADS-B", category: "Heavy", squawk: "2000" },
+  { icao: "AE0123", callsign: "NATO01", lat: 40.5, lon: 29.1, speed: 510, heading: 45, altitude: 25000, protocol: "ADS-B", category: "Large", squawk: "1234" },
+  { icao: "212345", callsign: "SHIP_1", lat: 40.8, lon: 28.9, speed: 15,  heading: 210, altitude: 0, protocol: "AIS", category: "", squawk: "" },
+  { icao: "4BAA99", callsign: "PEG111", lat: 41.5, lon: 29.5, speed: 320, heading: 270, altitude: 15000, protocol: "ADS-B", category: "Large", squawk: "7700", emergency: "General" }
+];
+function getDemoData() {
+  DEMO_FLIGHTS.forEach(f => {
+    if (f.speed > 0) {
+      const d = (f.speed * 0.514444 * 1) / 6371000; // 1 second distance
+      const h = f.heading * Math.PI / 180;
+      const la = f.lat * Math.PI / 180, lo = f.lon * Math.PI / 180;
+      const la2 = Math.asin(Math.sin(la)*Math.cos(d) + Math.cos(la)*Math.sin(d)*Math.cos(h));
+      f.lon = (lo + Math.atan2(Math.sin(h)*Math.sin(d)*Math.cos(la), Math.cos(d)-Math.sin(la)*Math.sin(la2))) * 180 / Math.PI;
+      f.lat = la2 * 180 / Math.PI;
+    }
+  });
+  return {
+    status: 'ok',
+    flights: DEMO_FLIGHTS.map(f => ({ ...f, age_seconds: 1, snr_db: (15 + Math.random()*5).toFixed(1) }))
+  };
+}
 
 const MIL_RANGES = [
   [0xAE0000,0xAEFFFF],[0x43C000,0x43CFFF],[0x3A4000,0x3A4FFF],
@@ -233,11 +258,18 @@ export default function App() {
   // ── Data fetch ─────────────────────────────────────────────
   const fetchFlights = useCallback(async () => {
     try {
-      const [fRes, sRes] = await Promise.all([
-        fetch('http://localhost:8000/api/flights'),
-        fetch('http://localhost:8000/api/status'),
-      ]);
-      const fd = await fRes.json(); const sd = await sRes.json();
+      let fd, sd;
+      if (IS_DEMO_MODE) {
+        fd = getDemoData();
+        sd = { hardware: "DEMO SIMULATOR", uptime: "00:00:00", contacts_seen: 4 };
+      } else {
+        const [fRes, sRes] = await Promise.all([
+          fetch('http://localhost:8000/api/flights'),
+          fetch('http://localhost:8000/api/status'),
+        ]);
+        fd = await fRes.json(); sd = await sRes.json();
+      }
+      
       setConnected(true); setLastUpdate(new Date()); setStatus(sd);
 
       if (fd.status === 'ok') {
@@ -286,6 +318,10 @@ export default function App() {
   }, []);
 
   const fetchIntercepts = useCallback(async () => {
+    if (IS_DEMO_MODE) {
+      setIntercepts([{ Timestamp: new Date().toISOString(), Identifier: "DEMO", Protocol: "SYS" }]);
+      return;
+    }
     try {
       const r = await fetch('http://localhost:8000/api/intercepts?limit=120');
       const d = await r.json();
