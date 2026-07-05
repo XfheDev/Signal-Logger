@@ -60,7 +60,7 @@ std::string netIP = "127.0.0.1";
 int netPort = 30003;
 
 // ============================================================
-// AIRCRAFT STATE TABLE (RTL1090-style in-memory DB)
+// AIRCRAFT STATE TABLE (In-memory DB)
 // ============================================================
 struct AircraftState {
     std::string icao;
@@ -352,7 +352,7 @@ void consumerThread() {
                         ac.lastRaw = pkt.rawHex;
                     }
 
-                    // Build RTL1090 + Signal Logger style log line
+                    // Build formatted log line
                     char logBuf[512];
                     sprintf_s(logBuf,
                         "%s | %s | DF%02d TC%02d | ICAO:%s | SNR:%+.1fdB",
@@ -425,7 +425,7 @@ void consumerThread() {
 }
 
 // ---------------------------------------------------------
-// NATIVE GUI (WIN32) - RTL1090-STYLE CONTROL PANEL
+// NATIVE GUI (WIN32) - CONTROL PANEL
 // ---------------------------------------------------------
 #define ID_BTN_START    1001
 #define ID_BTN_STOP     1002
@@ -624,7 +624,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // --- Raw Data Log ---
         y += 338;
-        CreateWindowA("STATIC","Raw Frame Log (RTL1090-style):",WS_CHILD|WS_VISIBLE,8,y,300,18,hwnd,NULL,NULL,NULL);
+        CreateWindowA("STATIC","Raw Frame Log:",WS_CHILD|WS_VISIBLE,8,y,300,18,hwnd,NULL,NULL,NULL);
         y += 20;
         g_hRawLog = CreateWindowExA(WS_EX_CLIENTEDGE,"EDIT","",
             WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_READONLY|WS_VSCROLL|ES_AUTOVSCROLL,
